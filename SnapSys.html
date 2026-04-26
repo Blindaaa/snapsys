@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SnapSys — Educator</title>
+<link rel="icon" href="snapsys_logo.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FFF6E5;
+    --ink: #1A1A1A;
+    --ink-soft: #2D2D2D;
+    --paper: #FFFFFF;
+    --yellow: #FFD23F;
+    --coral: #FF6B5C;
+    --blue: #3D8BFD;
+    --green: #5BC079;
+    --purple: #A875F5;
+    --shadow-offset: 4px;
+    --border-w: 3px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: 'Archivo Black', sans-serif; font-weight: 900; letter-spacing: -0.01em; }
+
+  /* Outlined card — no offset shadow */
+  .chunk {
+    border: var(--border-w) solid var(--ink);
+    border-radius: 18px;
+    background: var(--paper);
+    transition: transform 120ms ease, background 150ms ease;
+  }
+  .chunk-press {
+    cursor: pointer;
+    user-select: none;
+  }
+  .chunk-press:hover {
+    transform: translateY(-2px);
+  }
+  .chunk-press:active {
+    transform: translateY(0);
+  }
+  /* Buttons get the chunky press shadow */
+  .chunk-btn {
+    border: var(--border-w) solid var(--ink);
+    border-radius: 18px;
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 0 var(--ink);
+    transition: transform 80ms ease, box-shadow 80ms ease;
+    cursor: pointer;
+    user-select: none;
+  }
+  .chunk-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: calc(var(--shadow-offset) - 2px) calc(var(--shadow-offset) - 2px) 0 0 var(--ink);
+  }
+  .chunk-btn:active {
+    transform: translate(var(--shadow-offset), var(--shadow-offset));
+    box-shadow: 0 0 0 0 var(--ink);
+  }
+
+  /* Pill / tag */
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: var(--paper);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  /* Inputs */
+  input.chunk-input, textarea.chunk-input {
+    font-family: inherit;
+    font-weight: 600;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 18px;
+    background: var(--paper);
+    outline: none;
+    padding: 22px 24px;
+    color: var(--ink);
+    transition: border-color 120ms ease;
+  }
+  input.chunk-input:focus {
+    border-color: var(--coral);
+  }
+  ::placeholder { color: #999; opacity: 1; }
+
+  /* Animated dots */
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-14px); }
+  }
+  .dot {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    margin: 0 5px;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .dot:nth-child(1) { background: var(--yellow); animation-delay: 0s; }
+  .dot:nth-child(2) { background: var(--coral); animation-delay: 0.15s; }
+  .dot:nth-child(3) { background: var(--blue); animation-delay: 0.3s; }
+  .dot:nth-child(4) { background: var(--green); animation-delay: 0.45s; }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  /* Logo mark */
+  .logo {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--yellow);
+    border: 2.5px solid var(--ink);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: 'Archivo Black';
+    font-size: 16px;
+    transform: rotate(-6deg);
+  }
+
+  /* utility */
+  .row { display: flex; }
+  .col { display: flex; flex-direction: column; }
+  .gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-24 { gap: 24px; } .gap-32 { gap: 32px; }
+  .center { display: flex; align-items: center; justify-content: center; }
+
+  /* Topbar */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 32px;
+  }
+
+  /* Card hover/select */
+  .response-card.selected {
+    background: var(--yellow);
+  }
+  .response-card.dimmed {
+    opacity: 0.45;
+  }
+
+  /* Diff highlighting */
+  mark.diff-narrator { background: rgba(255,107,92,0.45); padding: 0 4px; border-radius: 4px; box-shadow: 0 -2px 0 rgba(255,107,92,0.45) inset, 0 2px 0 rgba(255,107,92,0.45) inset; }
+  mark.diff-source { background: rgba(61,139,253,0.35); padding: 0 4px; border-radius: 4px; }
+  mark.diff-tile { background: rgba(91,192,121,0.45); padding: 0 4px; border-radius: 4px; }
+
+  /* Flashcards */
+  .flashcard {
+    border: var(--border-w) solid var(--ink);
+    border-radius: 24px;
+    padding: 56px 48px;
+    color: var(--paper);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 14px; height: 14px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 999px; border: 3px solid var(--bg); }
+
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    // Tweak defaults persisted to disk
+    window.__TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accent": "green",
+      "background": "mint",
+      "displayFont": "Archivo Black",
+      "shadowSize": 6,
+      "borderWidth": 3.5
+    }/*EDITMODE-END*/;
+  </script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="screen-setup.jsx"></script>
+  <script type="text/babel" src="screen-compare.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
