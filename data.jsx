@@ -25,11 +25,11 @@ async function generateResponse({ topicId, sourceId, personaId, question }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        topic_id:   topicId,
-        source_id:  sourceId,
-        persona_id: personaId,
-        question:   question || "Tell me something interesting about this topic.",
-        round:      _roundCounter,
+        topic_id:    topicId,
+        source_id:   sourceId,
+        persona_id:  personaId,
+        topic_input: question || "",
+        round:       _roundCounter,
       }),
     });
 
