@@ -4,9 +4,9 @@
 const API_URL = "http://localhost:5050";
 
 const NARRATORS = {
-  hype:    { name: 'King',      color: 'var(--coral)',  emoji: '♛', bg: '#FFE2DE' },
-  doubter: { name: 'Witch',     color: 'var(--purple)', emoji: '✺', bg: '#EFE3FE' },
-  scholar: { name: 'Librarian', color: 'var(--blue)',   emoji: '✦', bg: '#DDEAFE' },
+  hype:    { name: 'Expert Coach',    color: 'var(--green)',  emoji: '🏅', bg: '#D1FAE5' },
+  doubter: { name: 'Expert Explorer', color: 'var(--yellow)', emoji: '🌍', bg: '#FEF9C3' },
+  scholar: { name: 'Expert Tutor',    color: 'var(--blue)',   emoji: '📖', bg: '#DDEAFE' },
 };
 
 const SOURCES = {
