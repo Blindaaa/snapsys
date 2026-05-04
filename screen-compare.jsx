@@ -66,6 +66,7 @@ function ScreenCompare({ topic, onReset }) {
                 dimmed={selected.length === 2 && !selected.includes(r.id)}
                 onToggle={() => toggle(r.id)}
                 compareIndex={selected.indexOf(r.id)}
+                topic={topic}
               />
             ))}
           </div>
@@ -89,36 +90,99 @@ function ScreenCompare({ topic, onReset }) {
   );
 }
 
-function ResponseCard({ card, selected, dimmed, onToggle, compareIndex }) {
+function ResponseCard({ card, selected, dimmed, onToggle, compareIndex, topic }) {
   const n = window.NARRATORS[card.narrator];
   const s = window.SOURCES[card.source];
+  const [imageUrl, setImageUrl] = React.useState(null);
+  const [imageLoading, setImageLoading] = React.useState(false);
+  const [showImage, setShowImage] = React.useState(false);
   if (!n) return null;
+
+  const handleGenerateImage = async (e) => {
+    e.stopPropagation();
+    setImageLoading(true);
+    try {
+      const res = await fetch("http://localhost:5050/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          card_id:  card.id,
+          topic:    topic || card.tiles?.[0] || "this topic",
+          question: card.tiles?.[0] || topic || "this topic",
+          persona:  card.narrator,
+        }),
+      });
+      const data = await res.json();
+      if (data.image_url) {
+        setImageUrl(data.image_url);
+        setShowImage(true);
+      }
+    } catch (err) {
+      console.error("Image generation failed:", err);
+    } finally {
+      setImageLoading(false);
+    }
+  };
 
   return (
     <div
-      onClick={onToggle}
       className="chunk chunk-press response-card"
       style={{ padding: 22, background: selected ? n.bg : 'var(--paper)', opacity: dimmed ? 0.4 : 1, position: 'relative', display: 'flex', flexDirection: 'column', gap: 14, cursor: 'pointer' }}
     >
-      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Round + select — clicking here toggles compare */}
+      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }} onClick={onToggle}>
         <span style={{ fontFamily: 'Archivo Black', fontSize: 13, color: '#999', letterSpacing: '0.05em' }}>ROUND {String(card.round).padStart(2, '0')}</span>
         <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid var(--ink)', background: selected ? 'var(--ink)' : 'transparent', color: 'white', display: 'grid', placeItems: 'center', fontFamily: 'Archivo Black', fontSize: 14 }}>
           {selected ? compareIndex + 1 : ''}
         </div>
       </div>
 
-      <NarratorBadge id={card.narrator} />
+      <div onClick={onToggle}>
+        <NarratorBadge id={card.narrator} />
+      </div>
 
       {s && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={onToggle}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Data source:</span>
           <SourceTag id={card.source} />
         </div>
       )}
 
-      <p style={{ margin: 0, fontSize: 15, lineHeight: 1.5, color: 'var(--ink-soft)', fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-        "{card.text}"
-      </p>
+      {/* Topic tag */}
+      {card.tiles?.[0] && (
+        <div onClick={onToggle}>
+          <TileTag name={card.tiles[0]} />
+        </div>
+      )}
+
+      {/* Toggle: text or image */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowImage(false); }}
+          style={{ flex: 1, padding: '6px 0', borderRadius: 8, border: `2px solid var(--ink)`, background: !showImage ? 'var(--ink)' : 'transparent', color: !showImage ? 'white' : 'var(--ink)', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          📝 Text
+        </button>
+        <button
+          onClick={handleGenerateImage}
+          style={{ flex: 1, padding: '6px 0', borderRadius: 8, border: `2px solid var(--ink)`, background: showImage ? 'var(--ink)' : 'transparent', color: showImage ? 'white' : 'var(--ink)', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          {imageLoading ? '⏳ Generating...' : imageUrl ? '🖼 Image' : '🎨 Generate Image'}
+        </button>
+      </div>
+
+      {/* Content area */}
+      {showImage && imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="Generated comic illustration"
+          style={{ width: '100%', borderRadius: 12, border: '2px solid var(--ink)', display: 'block' }}
+        />
+      ) : (
+        <p onClick={onToggle} style={{ margin: 0, fontSize: 15, lineHeight: 1.5, color: 'var(--ink-soft)', fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          "{card.text}"
+        </p>
+      )}
     </div>
   );
 }
@@ -166,16 +230,14 @@ function CompareCard({ card, index }) {
         <span style={{ fontFamily: 'Archivo Black', fontSize: 13, color: '#999' }}>ROUND {String(card.round).padStart(2, '0')}</span>
         <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--ink)', color: 'white', display: 'grid', placeItems: 'center', fontFamily: 'Archivo Black', fontSize: 13 }}>{index}</div>
       </div>
-
       <NarratorBadge id={card.narrator} />
-
       {s && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Data source:</span>
           <SourceTag id={card.source} />
         </div>
       )}
-
+      {card.tiles?.[0] && <TileTag name={card.tiles[0]} />}
       <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, fontWeight: 500 }}>
         "<HighlightedText text={card.text} highlights={highlights} />"
       </p>
