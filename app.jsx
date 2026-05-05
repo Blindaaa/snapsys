@@ -36,9 +36,13 @@ function App() {
   }, [tweaks]);
 
   const handleStart = (t) => {
-    setTopic(t);
-    setScreen('compare');
-  };
+  if (t === '__characters__') {
+    setScreen('characters');
+    return;
+  }
+  setTopic(t);
+  setScreen('compare');
+};
 
   return (
     <>
