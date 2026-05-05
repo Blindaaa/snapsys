@@ -44,6 +44,7 @@ function App() {
     <>
       {screen === 'setup' && <ScreenSetup onStart={handleStart} />}
       {screen === 'compare' && <ScreenCompare topic={topic} onReset={() => setScreen('setup')} />}
+      {screen === 'characters' && <ScreenCharacters onBack={() => setScreen('setup')} />}
 
       {/* Tweaks panel */}
       <window.TweaksPanel title="TWEAKS">
