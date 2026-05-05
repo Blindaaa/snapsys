@@ -169,6 +169,15 @@ function ScreenSetup({ onStart }) {
           >
             START GAME
           </ChunkyButton>
+          <ChunkyButton
+          color="var(--purple)"
+          textColor="white"
+          size="md"
+          style={{ width: '100%', maxWidth: 480, marginTop: 12 }}
+          onClick={() => onStart('__characters__')}
+        >
+        MEET THE NARRATORS
+        </ChunkyButton>
         </div>
       </div>
 
